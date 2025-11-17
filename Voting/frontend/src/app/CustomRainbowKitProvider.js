@@ -6,7 +6,6 @@ import {
 } from '@rainbow-me/rainbowkit';
 import { WagmiProvider } from 'wagmi';
 import {
-    hardhat,
     sepolia
 } from 'wagmi/chains';
 import {
@@ -17,7 +16,7 @@ import {
 const config = getDefaultConfig({
     appName: 'My RainbowKit App',
     projectId: '0eccd2f7f64b7f70e750849375c8bef9',
-    chains: [hardhat, sepolia],
+    chains: [sepolia],
     ssr: true, 
 });
 

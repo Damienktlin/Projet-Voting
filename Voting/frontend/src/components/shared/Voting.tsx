@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { contractAddress, contractAbi } from "@/constants";
 import { useReadContract, useAccount, useWriteContract, useWaitForTransactionReceipt} from "wagmi";
-import { publicClient } from "../../../utils/client";
 import ProposalReg from "./ProposalReg";
 import VotingSession from "./VotingSession";
 import Result from "./Result";
@@ -26,7 +25,6 @@ const Voting = () => {
     
     const [Authorized, setAuthorized]  = useState(false);
     const { address } = useAccount();
-    
     const [addr, setAddr] = useState<string>("");
     const [idProp, setIdProp] = useState<string>("0");
     const [prop, setProp] = useState<Prop | null>(null)
@@ -47,7 +45,26 @@ const Voting = () => {
         functionName: "workflowStatus"
     });
 
+    const {data : dataVoter, refetch : refetchVoter} = useReadContract({
+        account: address,
+        address: contractAddress,
+        abi: contractAbi,
+        functionName: "getVoter",
+        args: addr ? [addr] : undefined,
+        query: {
+            enabled: !!addr,
+    }});
 
+    const {data : dataProposal, refetch : refetchProposal} = useReadContract({
+        account: address,
+        address: contractAddress,
+        abi: contractAbi,
+        functionName: "getOneProposal",
+        args: [BigInt(idProp)],
+        query: {
+            enabled: !!idProp,
+    }});
+    
     const { data: hash1, error: errorSF1, isPending: isPendingSF1, isSuccess : isSuccessSF1, writeContract: writeContractTo1 } = useWriteContract()
     const { data: hash2, error: errorSF2, isPending: isPendingSF2, isSuccess : isSuccessSF2, writeContract: writeContractTo2 } = useWriteContract()
     const { data: hash3, error: errorSF3, isPending: isPendingSF3, isSuccess : isSuccessSF3, writeContract: writeContractTo3 } = useWriteContract()
@@ -61,12 +78,12 @@ const Voting = () => {
 
     const getVoter = async (address : string) => {
         try {
-            const voter = await publicClient.readContract({
-                address: contractAddress,
-                abi: contractAbi,
-                functionName: "getVoter",
-                args: [address]
-            }) as Voter;
+            setAddr(address);
+            const result = await refetchVoter();
+            if (!result.data) {
+                return null;
+            }
+            const voter = result.data as Voter;
             setVoter(voter);
             return voter;
         } catch (error) {
@@ -91,12 +108,12 @@ const Voting = () => {
 
     const getProposal = async () =>{
         try {
-            const getProp = await publicClient.readContract({
-                address: contractAddress,
-                abi: contractAbi,
-                functionName: "getOneProposal",
-                args: [BigInt(idProp)]
-            }) as Prop;
+            const result = await refetchProposal();
+            if (!result.data) {
+                toast.error(`Proposal with ID ${idProp} does not exist`, { duration: 5000 });
+                return;
+            }
+            const getProp = result.data as Prop;
             setProp(getProp);
             } catch (error) {
                 toast.error(`Error fetching proposal: ${error}`, { duration: 5000 });

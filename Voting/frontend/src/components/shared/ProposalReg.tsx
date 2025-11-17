@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "../ui/textarea";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { contractAddress, contractAbi } from "@/constants";
@@ -33,8 +32,8 @@ const ProposalReg = () => {
 
             const getProposalEvents = publicClient.getLogs({
                 event: parseAbiItem('event ProposalRegistered(uint proposalId)'),
-                fromBlock: 0n,
-                toBlock: 1000n
+                fromBlock: 9648829n,
+                toBlock: 'latest'
             });
 
             const formattedEvents = (await getProposalEvents).map(log => ({
@@ -82,9 +81,9 @@ const ProposalReg = () => {
         <p className="title p-5">Proposal registration</p>
         <div className="grid w-full gap-2">
             <Textarea placeholder="Describe your proposal here." onChange = {(e) => setDescription(e.target.value)}/>
-            <Button onClick={() => registerProposal(description)}>Register your proposal</Button>
+            <Button onClick={() => registerProposal(description)} disabled={isLoading}>Register your proposal</Button>
         </div>
-        {isSuccess && 
+        {isConfirmed && 
           <Alert className="mb-4 bg-lime-200">
             <RocketIcon className="h-4 w-4" />
             <AlertTitle>Your proposal has been registered successfully</AlertTitle>

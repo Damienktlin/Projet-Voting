@@ -1,15 +1,11 @@
 'use client';
 import { useState, useEffect } from "react";
-import { Toaster, toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "../ui/textarea";
+import {toast} from "sonner";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { Card, CardHeader, CardFooter, CardTitle, CardAction, CardDescription,} from "../ui/card";
 import {Item, ItemActions, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "../ui/item";
 import { contractAddress, contractAbi } from "@/constants";
 import { useReadContract, useAccount, useWriteContract, useWaitForTransactionReceipt} from "wagmi";
-import { RocketIcon } from "lucide-react";
 import { publicClient } from "../../../utils/client";
 import { parseAbi, parseAbiItem } from "viem";
 
@@ -32,16 +28,36 @@ interface Voter {
 const VotingSession = () => {
     const { address } = useAccount();
     const [voter, setVoter] = useState<Voter>({isRegistered:false, hasVoted:false, votedProposalId: 0n });
-
+    const [idProp, setIdProp] = useState<string>("0");
     const [listProposals, setListProposals] = useState<proposal[]>([])
     const [events, setEvents] = useState<EventLog[]>([])
+
+    const {data : dataProposal, refetch : refetchProposal} = useReadContract({
+        account: address,
+        address: contractAddress,
+        abi: contractAbi,
+        functionName: "getOneProposal",
+        args: [BigInt(idProp)],
+        query: {
+            enabled: !!idProp,
+    }});
+
+    const {data : dataVoter, refetch : refetchVoter} = useReadContract({
+            account: address,
+            address: contractAddress,
+            abi: contractAbi,
+            functionName: "getVoter",
+            args: [address],
+            query: {
+                enabled: !!address,
+            }});
 
     const getEvents = async () => {
 
             const getProposalEvents = publicClient.getLogs({
                 event: parseAbiItem('event ProposalRegistered(uint proposalId)'),
-                fromBlock: 0n,
-                toBlock: 1000n
+                fromBlock: 9648829n,
+                toBlock: 'latest'
             });
 
             const formattedEvents = (await getProposalEvents).map(log => ({
@@ -55,13 +71,13 @@ const VotingSession = () => {
 
     const getProposals = async (List: EventLog[]) => {
         const proposalsPromises = List.map(async (event) => {
-            const proposal = await publicClient.readContract({
-                address: contractAddress,
-                abi: contractAbi,
-                functionName: 'getOneProposal',
-                args: [BigInt(event.id)]
-            }) as proposal;
-            proposal['id'] = event.id;
+            setIdProp(event.id.toString());
+            const result = await refetchProposal();
+            const proposal: proposal = {
+                id: event.id,
+                description: (result.data as {description:string, voteCount: bigint}).description,
+                voteCount: Number((result.data as {description:string, voteCount: bigint}).voteCount)
+            };
             return proposal;
         });
 
@@ -104,12 +120,11 @@ const VotingSession = () => {
                 if(errorVote || errorConfirmation) {
                     toast.error("Error confirming the vote");
                 }
-                const voter = await publicClient.readContract({
-                    address: contractAddress,
-                    abi: contractAbi,
-                    functionName: 'getVoter',
-                    args: [address]
-                }) as Voter;
+                const result = await refetchVoter();
+                if (!result.data) {
+                    return;
+                }
+                const voter = result.data as Voter;
                 setVoter(voter);
             } catch (error) {
                 console.error("Error getting voter data:", error);

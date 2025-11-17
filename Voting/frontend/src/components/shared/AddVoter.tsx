@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { contractAddress, contractAbi } from "@/constants";
 import { useReadContract, useAccount, useWriteContract, useWaitForTransactionReceipt} from "wagmi";
 import { parseAbi, parseAbiItem } from "viem";
@@ -33,8 +32,8 @@ const AddVoter = () => {
     const getEvents = async () => {
         const getVoterRegisterLogs =  await publicClient.getLogs({
         event: parseAbiItem('event VoterRegistered(address voterAddress)'),
-        fromBlock: 0n,
-        toBlock: 1000n
+        fromBlock: 9648829n,
+        toBlock: 'latest',
         });
         setEvents(getVoterRegisterLogs.map(log => ({
             eventName: 'VoterRegistered',
