@@ -55,6 +55,7 @@ const VotingSession = () => {
     const getEvents = async () => {
 
             const getProposalEvents = publicClient.getLogs({
+                address: contractAddress,
                 event: parseAbiItem('event ProposalRegistered(uint proposalId)'),
                 fromBlock: 9648829n,
                 toBlock: 'latest'
