@@ -31,12 +31,10 @@ const AddVoter = () => {
 
     const getEvents = async () => {
         const getVoterRegisterLogs =  await publicClient.getLogs({
-        event: parseAbiItem('event VoterRegistered(address voterAddress)'),
-        args: {
-            to: contractAddress
-        },
-        fromBlock: 9648829n,
-        toBlock: 'latest',
+            address: contractAddress,
+            event: parseAbiItem('event VoterRegistered(address voterAddress)'),
+            fromBlock: 9648829n,
+            toBlock: 'latest',
         });
         setEvents(getVoterRegisterLogs.map(log => ({
             eventName: 'VoterRegistered',
