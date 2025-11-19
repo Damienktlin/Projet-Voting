@@ -47,7 +47,7 @@ const Result = () => {
         <h2 className="title p-10">Result</h2>
 
         <div className="flex p-5 justify-between justify-center items-center gap-5">
-            <Button variant="outline" onClick={tallyVote} size="lg" disabled={winner !== "0"}><strong>Tally vote</strong>  </Button>
+            <Button variant="outline" onClick={tallyVote} size="lg" disabled={winner !== "0" || isLoading}><strong>Tally vote</strong>  </Button>
         </div>
         {winner !== "0" ? (
             <div className="p-5 items-center justify-center mb-4 bg-green-500 rounded-lg">

@@ -69,14 +69,14 @@ const VotingSession = () => {
             setEvents(formattedEvents);
             return formattedEvents;
     }
-
+    //code non fonctionnel
     const getProposals = async (List: EventLog[]) => {
         //const proposalsPromises = List.map(async (event) => {
         for (const event of List){
             setIdProp(event.id);
-            console.log("Fetching proposal with ID:", idProp);
+            //console.log("Fetching proposal with ID:", idProp);
             const result = await refetchProposal();
-            console.log("Proposal data:", result.data);
+            //console.log("Proposal data:", result.data);
             const proposal: proposal = {
                 id: event.id,
                 description: (result.data as {description:string, voteCount: bigint}).description,
@@ -94,13 +94,13 @@ const VotingSession = () => {
         const fetchData = async () => {
             try {
                 if (check) {
-                check = false;
-
-                const fetchedEvents = await getEvents();
-                console.log("Fetched events:", fetchedEvents);
-                if(fetchedEvents.length > 0) {
-                    await getProposals(fetchedEvents);
-                }}
+                    check = false; // pour éviter les appels multiples
+                    const fetchedEvents = await getEvents();
+                    console.log("Fetched events:", fetchedEvents);
+                    if(fetchedEvents.length > 0) {
+                        await getProposals(fetchedEvents);
+                    }
+                }
             } catch (error) {
                 console.error("Erreur dans la récupération des proposals:", error);
             }
@@ -156,17 +156,15 @@ const VotingSession = () => {
                         )}
 
         <div className="container mx-auto px-4 py-8">
-            {listProposals.length > 0 ? (
+            {events.length > 0 ? (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {listProposals.map((proposal) => {
+                    {events.map((proposal) => {
                         return (
                             <div key={proposal.id}>
                             <Item variant="outline">
                                 <ItemContent>
                                 <ItemTitle>Proposal #{proposal.id}</ItemTitle>
-                                <ItemDescription>
-                                    {proposal.description}
-                                </ItemDescription>
+                                
                                 </ItemContent>
                             <ItemActions>
                                 <Button size="sm" onClick={()=>vote(proposal.id)} disabled={isPendingVote || isLoading || voter.hasVoted}>
