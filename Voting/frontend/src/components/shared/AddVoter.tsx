@@ -33,7 +33,7 @@ const AddVoter = () => {
         const getVoterRegisterLogs =  await publicClient.getLogs({
             address: contractAddress,
             event: parseAbiItem('event VoterRegistered(address voterAddress)'),
-            fromBlock: 9648829n,
+            fromBlock: 9661680n,
             toBlock: 'latest',
         });
         setEvents(getVoterRegisterLogs.map(log => ({
@@ -62,7 +62,7 @@ const AddVoter = () => {
         <p className="title p-5">Add a voter</p>
         <div className="flex">
             <Input placeholder="enter the voter address to register" onChange={(e) => setAddrVoter(e.target.value)} />
-            <Button variant="outline" onClick={() => addVoter(addrVoter)} disabled={isPendingAddVoter}>Add a voter</Button>
+            <Button variant="outline" onClick={() => addVoter(addrVoter)} disabled={isPendingAddVoter && isLoading}>Add a voter</Button>
         </div>
 
         <h2 className="mt-6 mb-4 text-4xl">Events</h2>

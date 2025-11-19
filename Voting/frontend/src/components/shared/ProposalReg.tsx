@@ -33,7 +33,7 @@ const ProposalReg = () => {
             const getProposalEvents = publicClient.getLogs({
                 address: contractAddress,
                 event: parseAbiItem('event ProposalRegistered(uint proposalId)'),
-                fromBlock: 9648829n,
+                fromBlock: 9661680n,
                 toBlock: 'latest'
             });
 

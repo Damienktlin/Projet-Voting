@@ -51,9 +51,7 @@ const Voting = () => {
         abi: contractAbi,
         functionName: "getVoter",
         args: addr ? [addr] : undefined,
-        query: {
-            enabled: !!addr,
-    }});
+        });
 
     const {data : dataProposal, refetch : refetchProposal} = useReadContract({
         account: address,
@@ -80,6 +78,7 @@ const Voting = () => {
         try {
             setAddr(address);
             const result = await refetchVoter();
+            console.log("Voter data:", result.data);
             if (!result.data) {
                 return null;
             }

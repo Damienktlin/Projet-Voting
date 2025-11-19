@@ -28,7 +28,7 @@ interface Voter {
 const VotingSession = () => {
     const { address } = useAccount();
     const [voter, setVoter] = useState<Voter>({isRegistered:false, hasVoted:false, votedProposalId: 0n });
-    const [idProp, setIdProp] = useState<string>("0");
+    const [idProp, setIdProp] = useState<number>(0);
     const [listProposals, setListProposals] = useState<proposal[]>([])
     const [events, setEvents] = useState<EventLog[]>([])
 
@@ -57,7 +57,7 @@ const VotingSession = () => {
             const getProposalEvents = publicClient.getLogs({
                 address: contractAddress,
                 event: parseAbiItem('event ProposalRegistered(uint proposalId)'),
-                fromBlock: 9648829n,
+                fromBlock: 9661680n,
                 toBlock: 'latest'
             });
 
@@ -71,28 +71,36 @@ const VotingSession = () => {
     }
 
     const getProposals = async (List: EventLog[]) => {
-        const proposalsPromises = List.map(async (event) => {
-            setIdProp(event.id.toString());
+        //const proposalsPromises = List.map(async (event) => {
+        for (const event of List){
+            setIdProp(event.id);
+            console.log("Fetching proposal with ID:", idProp);
             const result = await refetchProposal();
+            console.log("Proposal data:", result.data);
             const proposal: proposal = {
                 id: event.id,
                 description: (result.data as {description:string, voteCount: bigint}).description,
                 voteCount: Number((result.data as {description:string, voteCount: bigint}).voteCount)
             };
-            return proposal;
-        });
+            //return proposal;
+            setListProposals(prev => [...prev, proposal]);
+        };
 
-        const proposals = await Promise.all(proposalsPromises);
-        setListProposals(proposals);
+        //const proposals = await Promise.all(proposalsPromises);
+        //setListProposals(proposals);
         }
-
+    let check = true;
     useEffect(() => {
         const fetchData = async () => {
             try {
+                if (check) {
+                check = false;
+
                 const fetchedEvents = await getEvents();
+                console.log("Fetched events:", fetchedEvents);
                 if(fetchedEvents.length > 0) {
                     await getProposals(fetchedEvents);
-                }
+                }}
             } catch (error) {
                 console.error("Erreur dans la récupération des proposals:", error);
             }
